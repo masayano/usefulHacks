@@ -25,11 +25,11 @@ def loadArgs():
         TASK_FILE   = sys.argv[3]
         LOG_FILE    = sys.argv[4]
         if not os.path.exists(REPLY_FILE):
-            open(REPLY_FILE,      'w').write('')
+            open(REPLY_FILE, 'w').write('')
         if not os.path.exists(TASK_FILE):
-            open(TASK_FILE, 'w').write('')
+            open(TASK_FILE,  'w').write('')
         if not os.path.exists(LOG_FILE):
-            open(LOG_FILE,        'w').write('')
+            open(LOG_FILE,   'w').write('')
     else:
         print 'Usage:',\
               'python child.py',\
