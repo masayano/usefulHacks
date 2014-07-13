@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright 2014, Masahiro Yano 
+# Licensed under the BSD licenses. 
+# https://github.com/masayano 
+#
 # What is this?
 #
 #   [RSS url list in 'rss_url.dat'] -> [contents clusterd by word frequency]
@@ -9,7 +13,8 @@
 #
 #  0:This script is written in "python 2.7".
 #
-#  1:This script uses "MeCab 0.98" to support Japanese.
+#  1:This script uses "TinySegmenyer" to support Japanese.
+#    See also http://www.programming-magic.com/20080726203844/
 #
 #  2:This script uses "bayon 0.1.1".
 #    See also https://code.google.com/p/bayon/
@@ -22,7 +27,7 @@ import platform
 import datetime
 import ConfigParser
 import feedparser
-import MeCab
+from tiny_segmenter import TinySegmenter
 import subprocess
 import textwrap
 
@@ -145,22 +150,8 @@ def featureExtraction(papers):
     return features    
 
 def extractWords(inStr):
-    specialChars = ['\"', '&', '\'', '(', ')' , \
-                    ',' , '-', '.' , ':', ';' , \
-                    '<' , '>', '?' , '[', '\\', \
-                    ']' , '^', '_' , '`', '{' , \
-                    '|' , '}', '~' , '=', '/' , \
-                    '@']
-    for specialChar in specialChars:
-        inStr = inStr.replace(specialChar, ' ')
-    tagger = MeCab.Tagger('-Ochasen')
-    node = tagger.parseToNode(inStr.encode(ENCODE))
-    node = node.next
-    words = []
-    while node.next:
-        words.append(node.surface.decode(ENCODE))
-        node = node.next
-    return words
+    ts = TinySegmenter()
+    return ts.segment(inStr)
 
 def writeFeatureData(features):
     fout = codecs.open(FEATURE_FILE, 'w', ENCODE)
