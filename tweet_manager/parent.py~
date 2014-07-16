@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# Copyright 2014, Masahiro Yano 
-# Licensed under the BSD licenses. 
-# https://github.com/masayano 
-#
-
 import sys
 import os
 import common

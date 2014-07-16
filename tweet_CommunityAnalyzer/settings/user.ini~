@@ -1,0 +1,8 @@
+[SYSTEM]
+ConsumerKey       = m1KgRmt0T2SrnlJWpGuQ
+ConsumerSecret    = 82neEESXCj1CuBDvIpUiVm5r2gQDEpu4XWfLTWQ5lKc
+AccessToken       = 82126429-41KeIfw8nGW58j5ESmvqSscPeT7g6QIaNGU38HfL9
+AccessTokenSecret = ATQOoAiyCVWBuilZIr7H46KDzRfPSzRGB0IolLWVwAhNf
+[SETTING]
+RemoveUnfollowbacked = False
+FollowBack           = False
