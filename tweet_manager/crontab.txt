@@ -1,0 +1,2 @@
+PATH=/usr/local/bin:/usr/bin
+0/10 * * * * /bin/bash /[download directory]/call.sh > /dev/null 2>&1
