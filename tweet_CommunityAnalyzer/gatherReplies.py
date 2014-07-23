@@ -32,8 +32,6 @@ def gatherReplies(userName, twitterFile, repliesFile, depth):
             repliesFile)
 
 if __name__=="__main__":
-    args = sys.argv
-    if len(args) == 2:
-        gatherReplies(args[1], 'settings/user.ini', 'data/replies.json', 1)
-    else:
-        print "Usage: python gatherReplies.py [target user ID]"
+    targetID = raw_input("Input target twitter ID > ")
+    print 'Gather tweets started.'
+    gatherReplies.gatherReplies(targetID, 'settings/user.ini', 'data/replies.json', 1)

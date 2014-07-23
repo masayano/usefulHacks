@@ -22,17 +22,14 @@ def __escapeJSONContent(jsonContent):
     return jsonContent.replace('\n','\\n').replace('\t','\\t')
 
 def __writeReplyDB(replyDBFile, replyDB):
-    fout = codecs.open(replyDBFile, 'w', ENCODE)
-    for userId,value in replyDB.items():
-        for toUserId,replies in value.items():
-            for reply in replies:
-                fout.write(str(userId)+'\t'+str(toUserId)+'\t'+reply+'\n')
+    fout = codecs.open(replyDBFile, 'w', 'utf-8')
+    json.dump(replyDB, fout, indent=2, ensure_ascii=False)
+    fout.close()
 
 def __writeUserDB(userDBFile, userDB):
-    fout = codecs.open(userDBFile, 'w', ENCODE)
-    for userId,userNames in userDB.items():
-        for userName in userNames:
-            fout.write(str(userId)+'\t'+userName+'\n')
+    fout = codecs.open(userDBFile, 'w', 'utf-8')
+    json.dump(userDB, fout, indent=2, ensure_ascii=False)
+    fout.close()
 
 def trimReplies(replyFile, replyDBFile, userDBFile):
     replyDB = {}
@@ -61,5 +58,5 @@ def trimReplies(replyFile, replyDBFile, userDBFile):
     __writeUserDB(userDBFile, userDB)
 
 if __name__=='__main__':
-    trimReplies('data/replies.json', 'data/replyDB.tsv', 'data/userDB.tsv')
+    trimReplies('data/replies.json', 'data/replyDB.json', 'data/userDB.json')
 

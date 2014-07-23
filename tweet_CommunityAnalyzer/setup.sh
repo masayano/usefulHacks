@@ -5,9 +5,6 @@
 # https://github.com/masayano 
 #
 
-echo "[INFO] Building \"analyzeReplies\"."
-g++ -std=c++11 analyzeReplies.cpp -O3 -o analyzeReplies
-
 echo "[INFO] Downloading \"pn_ja.duc\" from \"http://www.lr.pi.titech.ac.jp/~takamura/pubs/pn_ja.dic\"."
 wget http://www.lr.pi.titech.ac.jp/~takamura/pubs/pn_ja.dic
 
