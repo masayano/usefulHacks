@@ -135,13 +135,29 @@ def getPapers(feeds):
     print '->', errorCount, ' items are discarded (broken data).'
     return papers
 
+def deleteOddChars(text):
+    chars = ['!', '\"', '#', '$',  '%', \
+             '&', '\'', '(', ')',  '*', \
+             '+', ',',  '-', '.',  '/', \
+             '@', ':',  ';', '<',  '=', \
+             '>', '?',  '[', '\\', ']', \
+             '^', '_',  '{', '|',  '}', '~']
+    for char in chars:
+        text = text.replace(char, ' ')
+    text = text.split(' ')
+    while text.count('') > 0:
+        text.remove('')
+    text = ' '.join(text)
+    return text
+
 def featureExtraction(papers):
     features = []
     for title in papers.keys():
         feature = {FEATURE_TITLE:title, FEATURE_VEC:{}}
         content = papers[title]
-        words = extractWords(title + ' ' + content[R.ITEM_MAIN])
+        words = extractWords(deleteOddChars(title + ' ' + content[R.ITEM_MAIN]))
         for word in words:
+            word = word.replace(' ', '')
             if feature.has_key(word):
                 feature[FEATURE_VEC][word] += 1
             else:
