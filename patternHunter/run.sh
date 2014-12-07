@@ -1,5 +1,10 @@
+#!/bin/sh
 for file in tweets/*.log
 do
     python script/wordCounter.py $file
 done
-python script/analyzeWord.py tweets/*.count
+
+if [ ! -e analysis ]; then
+    mkdir analysis
+fi
+./bin/analyzeWord tweets/*.count
