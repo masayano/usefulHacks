@@ -42,8 +42,7 @@ const std::vector<std::string> splitString(const std::string& str) {
 }
 
 void loadFile(
-        std::map<std::string, std::vector<int> >&    smoothedNumMatrix,
-        std::map<std::string, std::vector<double> >& smoothedProbMatrix,
+        std::map<std::string, std::pair<std::vector<int>, std::vector<double> > >& smoothedMatrix,
         std::vector<std::map<std::string, int> >& wordCounters,
         std::vector<double>& totalWordNums,
         const std::string& fileName) {
@@ -56,10 +55,9 @@ void loadFile(
         const auto& word  = parts[0];
         const auto& count = boost::lexical_cast<int>(parts[1]);
         wordCounter[word] = count;
-        const auto& it = smoothedNumMatrix.find(word);
-        if(it == std::end(smoothedNumMatrix)) {
-            smoothedNumMatrix [word] = std::vector<int>();
-            smoothedProbMatrix[word] = std::vector<double>();
+        const auto& it = smoothedMatrix.find(word);
+        if(it == std::end(smoothedMatrix)) {
+            smoothedMatrix[word] = std::make_pair(std::vector<int>(), std::vector<double>());
         }
         totalWordNum += 1;
     }
@@ -68,16 +66,15 @@ void loadFile(
 }
 
 void makeMatrix(
-        std::map<std::string, std::vector<int> >&    smoothedNumMatrix,
-        std::map<std::string, std::vector<double> >& smoothedProbMatrix,
+        std::map<std::string, std::pair<std::vector<int>, std::vector<double> > >& smoothedMatrix,
         const std::vector<std::map<std::string, int> >& wordCounters,
         const std::vector<double>& totalWordNums) {
-    const auto wordTypeNum = static_cast<double>(smoothedNumMatrix.size());
+    const auto wordTypeNum = static_cast<double>(smoothedMatrix.size());
     for(int i = 0; i < wordCounters.size(); ++i) {
         const auto& wordCounter  = wordCounters [i];
         const auto& totalWordNum = totalWordNums[i];
         const auto& totalNumAfterSmoothed = totalWordNum + wordTypeNum;
-        for(const auto& elem : smoothedNumMatrix) {
+        for(const auto& elem : smoothedMatrix) {
             const auto& key = elem.first;
             const auto& it  = wordCounter.find(key);
             int smoothedNumber;
@@ -87,8 +84,8 @@ void makeMatrix(
                 smoothedNumber = 1; // smoothing
             }
             const auto probability = smoothedNumber / totalNumAfterSmoothed;
-            smoothedNumMatrix [key].push_back(smoothedNumber);
-            smoothedProbMatrix[key].push_back(probability);
+            smoothedMatrix[key].first .push_back(smoothedNumber);
+            smoothedMatrix[key].second.push_back(probability);
         }
     }
 }
@@ -119,13 +116,13 @@ double calcSlope(
 }
 
 const std::vector<std::pair<double, std::string> > calcSlope(
-        const std::map<std::string, std::vector<double> >& smoothedProbMatrix) {
+        const std::map<std::string, std::pair<std::vector<int>, std::vector<double> > >& smoothedMatrix) {
     std::vector<std::pair<double, std::string> > results;
-    const auto length = (*std::begin(smoothedProbMatrix)).second.size();
+    const auto length = (*std::begin(smoothedMatrix)).second.first.size();
     const auto values_x = range(length);
-    for(const auto& elem : smoothedProbMatrix) {
+    for(const auto& elem : smoothedMatrix) {
         const auto& key      = elem.first;
-        const auto& values_y = elem.second;
+        const auto& values_y = elem.second.second;
         const auto z = calcSlope(values_x, values_y);
         const auto average = std::accumulate(std::begin(values_y), std::end(values_y), 0.0) / length;
         results.push_back(std::make_pair(z / average, key));
@@ -176,18 +173,18 @@ const std::string makeStrNumArray(const std::vector<int>& numArray) {
 
 void writeResults(
         const std::vector<std::pair<double, std::string> >& results,
-        std::map<std::string, std::vector<int> >&    smoothedNumMatrix,
-        std::map<std::string, std::vector<double> >& smoothedProbMatrix) {
+        std::map<std::string, std::pair<std::vector<int>, std::vector<double> > >& smoothedMatrix) {
     const auto fileName = "analysis/" + getDate() + ".log";
     std::ofstream ofs(fileName.c_str());
     for(const auto& elem : results) {
         const auto& slope = elem.first;
         const auto& key   = elem.second;
-        const auto& probArray = smoothedProbMatrix[key];
+        const auto& value = smoothedMatrix[key];
+        const auto& probArray = value.second;
         const auto strProbArray = makeStrProbArray(probArray);
         const auto averageProb = std::accumulate(std::begin(probArray), std::end(probArray), 0.0) / probArray.size();
         if(averageProb > MIN_AVERAGE_PROBABILITY) {
-            const auto strNumArray = makeStrNumArray(smoothedNumMatrix[key]);
+            const auto strNumArray = makeStrNumArray(value.first);
             ofs
                     << key
                     << "\t"
@@ -202,31 +199,27 @@ void writeResults(
 }
 
 int main(int argc, char** argv) {
-    std::map<std::string, std::vector<int> >    smoothedNumMatrix;
-    std::map<std::string, std::vector<double> > smoothedProbMatrix;
-    std::vector<std::map<std::string, int> >    wordCounters;
-    std::vector<double>                         totalWordNums;
+    std::map<std::string, std::pair<std::vector<int>, std::vector<double> > > smoothedMatrix;
+    std::vector<std::map<std::string, int> > wordCounters;
+    std::vector<double>                      totalWordNums;
     if(argc >= 2) {
         for(int i = 1; i < argc; ++i) {
             const auto fileName = argv[i];
             std::cout << "[Load for analyzing] " << fileName << std::endl;
             loadFile(
-                    smoothedNumMatrix,
-                    smoothedProbMatrix,
+                    smoothedMatrix,
                     wordCounters,
                     totalWordNums,
                     fileName);
         }
         makeMatrix(
-                smoothedNumMatrix,
-                smoothedProbMatrix,
+                smoothedMatrix,
                 wordCounters,
                 totalWordNums);
-        const auto results = calcSlope(smoothedProbMatrix);
+        const auto results = calcSlope(smoothedMatrix);
         writeResults(
                 results,
-                smoothedNumMatrix,
-                smoothedProbMatrix);
+                smoothedMatrix);
     } else {
         std::cout << "Usage: python analyzeWord.py [word count file name(s)]" << std::endl;
     }
